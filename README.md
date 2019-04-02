@@ -10,4 +10,7 @@ tensorflow version:1.13.1
 
 pandas 0.24.2 
 
+
+you can run main.py  to perform the training
+
 updating
