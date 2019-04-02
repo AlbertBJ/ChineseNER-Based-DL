@@ -5,6 +5,10 @@ using tensorflow to implement ChineseNER
 training dataset from  https://bosonnlp.com/dev/resource
 
 pre-trained embedding from https://github.com/Embedding/Chinese-Word-Vectors
+  or you can download from link：https://pan.baidu.com/s/1RhYR2iMgiuoPhq49icNwqw 
+                           code：77bi 
+
+  
 
 tensorflow version:1.13.1
 
