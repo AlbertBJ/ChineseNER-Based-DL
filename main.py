@@ -75,11 +75,14 @@ params = parser.parse_args()
 
 def train(dict_config):
     log = Log(dict_config['log'])
+    log.info('execute train')
 
     tf.reset_default_graph()
     x_train, x_test, y_train, y_test, sequence_train, sequence_test, id2word, id2tag, word2id, tag2id = pre_process(
         dict_config)
+    log.info(' data processed')
     batchManager = BatchManager(x_train, y_train, sequence_train)
+    log.info(' begin train ')
     with tf.Session() as sess:
         model = createModel(sess, dict_config)
         batch_num = math.ceil(x_train.shape[0] / model.batch_size)
@@ -108,21 +111,24 @@ def train(dict_config):
                         os.path.join(dict_config['sModelFile'],
                                      dict_config['model_name']),
                         global_step=step)
-                    print('model saved {}'.format(step))
-                    print('step is {}, and loss is {}'.format(step, loss))
+                    log.info(' model saved. epoch:{}, step:{}'.format(
+                        epoch, step))
+                    # print('model saved {}'.format(step))
+                    log.info(' step : {}, and loss is {}'.format(step, loss))
+                    # print()
                     model.rate = 0
                     P_, R_, F1_ = evaluate(sess, model, x_train, y_train,
                                            sequence_train, id2tag, id2word)
+                    log.info('evaluate model:')
                     train_s = 'train data P value:{},R value:{},F1 value:{}'.format(
                         P_, R_, F1_)
-                    print(train_s)
                     log.info(train_s)
 
                     P, R, F1 = evaluate(sess, model, x_test, y_test,
                                         sequence_test, id2tag, id2word)
                     test_s = 'Test data P value:{},R value:{},F1 value:{}'.format(
                         P, R, F1)
-                    print(test_s)
+                    # print(test_s)
                     log.info(test_s)
 
 
@@ -141,6 +147,7 @@ def evaluate(session, model, x_test, y_test, sequence_test, id2tag, id2word):
 
 
 def inference(dict_config):
+    log.info("begin to inference")
     with open(dict_config['dicPath'], "rb") as f:
         id2word, id2tag, word2id, tag2id = pickle.load(f)
     with tf.Session() as sess:
@@ -159,6 +166,7 @@ def inference(dict_config):
 
 
 def run():
+    # convert to dict
     dic = vars(params)
 
     if dic['is_train']:
