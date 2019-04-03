@@ -72,17 +72,20 @@ parser.add_argument(
 
 params = parser.parse_args()
 
+F = 0
+
 
 def train(dict_config):
     log = Log(dict_config['log'])
     log.info('execute train')
 
-    tf.reset_default_graph()
+    
     x_train, x_test, y_train, y_test, sequence_train, sequence_test, id2word, id2tag, word2id, tag2id = pre_process(
         dict_config)
     log.info(' data processed')
     batchManager = BatchManager(x_train, y_train, sequence_train)
     log.info(' begin train ')
+    tf.reset_default_graph()
     with tf.Session() as sess:
         model = createModel(sess, dict_config)
         batch_num = math.ceil(x_train.shape[0] / model.batch_size)
@@ -106,13 +109,7 @@ def train(dict_config):
                     [model.decode_tags, model.loss, model.train_op], dic)
 
                 if step % dict_config['model_save_step'] == 0:
-                    saver.save(
-                        sess,
-                        os.path.join(dict_config['sModelFile'],
-                                     dict_config['model_name']),
-                        global_step=step)
-                    log.info(' model saved. epoch:{}, step:{}'.format(
-                        epoch, step))
+
                     # print('model saved {}'.format(step))
                     log.info(' step : {}, and loss is {}'.format(step, loss))
                     # print()
@@ -130,6 +127,16 @@ def train(dict_config):
                         P, R, F1)
                     # print(test_s)
                     log.info(test_s)
+                    global F
+                    if F1 > F:
+                        F = F1
+                        saver.save(
+                            sess,
+                            os.path.join(dict_config['sModelFile'],
+                                         dict_config['model_name']),
+                            global_step=step)
+                        log.info(' model saved. epoch:{}, step:{}'.format(
+                            epoch, step))
 
 
 def evaluate(session, model, x_test, y_test, sequence_test, id2tag, id2word):

@@ -185,8 +185,10 @@ def getEntities(result_decode, input_text, id2tag, senquence_lengths):
 
 
 def saveJson(dict_config):
+    d=dict_config.copy()
+    d.pop('embedding')
     with open(os.path.join(os.path.dirname(__file__), 'config/conf.json'), 'w') as json_file:
-        json_file.write(json.dumps(dict_config))
+        json_file.write(json.dumps(d))
 
 
 def loadJson():
