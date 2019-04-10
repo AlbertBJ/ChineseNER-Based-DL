@@ -16,7 +16,7 @@ class Model:
         self.senMaxLen = dic_config['sentenceMaxLen']
         self.tag_size = dic_config['tag_size']
         self.batch_size = dic_config['batch_size']
-        self.is_train=dic_config['is_train']
+        self.is_train = dic_config['is_train']
         if self.is_train:
             self.rate = dic_config['rate']
         else:
@@ -35,6 +35,9 @@ class Model:
             tf.int32, shape=[None, self.senMaxLen], name='label_data')
         self.sequence_length = tf.placeholder(
             tf.int32, shape=[None], name='real_length')
+        l2_regularizer = None
+        if self.is_train:
+            l2_regularizer = tf.contrib.layers.l2_regularizer(0.0001)
 
         # get embedding matrix for next step(BiLSTM layer)
         lstm_input = self.embeddingLayer()
@@ -43,7 +46,7 @@ class Model:
         lstm_output = self.biLSTMLayer(lstm_input)
 
         # get dense_output for next step(crf layer)
-        dense_output = self.denseLayer(lstm_output)
+        dense_output = self.denseLayer(lstm_output, l2_regularizer)
 
         # get log_likelihood for next step(loss layer)
         log_likelihood = self.CRFLayer(dense_output)
@@ -83,7 +86,7 @@ class Model:
                 lstm_output, shape=[-1, self.embedding_dim * 2])
             return lstm_output
 
-    def denseLayer(self, inputs):
+    def denseLayer(self, inputs, l2_regularizer):
         '''
         full connect layer
         '''
@@ -92,6 +95,9 @@ class Model:
                 'weight', [2 * self.embedding_dim, self.tag_size],
                 dtype=tf.float32)
             b = tf.get_variable('bias', [self.tag_size], dtype=tf.float32)
+            if not l2_regularizer or l2_regularizer is not None:
+                tf.add_to_collection('l2_loss', l2_regularizer(w))
+
             dense_output = tf.nn.relu(tf.add(tf.linalg.matmul(inputs, w), b))
             # recover original shape for next crf
             dense_output = tf.reshape(dense_output,
@@ -116,7 +122,8 @@ class Model:
         get loss layer minimizing loss
         '''
         # crf  maxmizing log_likelihood, so add a minus before log_likelihood here to minimize the loss
-        self.loss = tf.math.reduce_mean(-log_likelihood)
+        self.loss = tf.math.reduce_mean(-log_likelihood) + tf.add_n(
+            tf.get_collection('l2_loss'))
         self.train_op = tf.train.AdamOptimizer(self.lr).minimize(self.loss)
 
     def train(self):

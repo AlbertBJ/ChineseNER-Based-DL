@@ -108,11 +108,9 @@ def train(dict_config):
                 sqe, loss, _ = sess.run(
                     [model.decode_tags, model.loss, model.train_op], dic)
 
-                if step % dict_config['model_save_step'] == 0:
-
-                    # print('model saved {}'.format(step))
+                if step % dict_config['model_save_step'] == 0:                    
                     log.info(' step : {}, and loss is {}'.format(step, loss))
-                    # print()
+                    
                     model.rate = 0
                     P_, R_, F1_ = evaluate(sess, model, x_train, y_train,
                                            sequence_train, id2tag, id2word)
@@ -124,19 +122,29 @@ def train(dict_config):
                     P, R, F1 = evaluate(sess, model, x_test, y_test,
                                         sequence_test, id2tag, id2word)
                     test_s = 'Test data P value:{},R value:{},F1 value:{}'.format(
-                        P, R, F1)
-                    # print(test_s)
+                        P, R, F1)                    
                     log.info(test_s)
-                    global F
-                    if F1 > F:
-                        F = F1
-                        saver.save(
+
+                    saver.save(
                             sess,
                             os.path.join(dict_config['sModelFile'],
                                          dict_config['model_name']),
                             global_step=step)
-                        log.info(' model saved. epoch:{}, step:{}'.format(
+                    log.info(' model saved. epoch:{}, step:{}'.format(
                             epoch, step))
+
+
+
+                    # global F
+                    # if F1 > F:
+                    #     F = F1
+                    #     saver.save(
+                    #         sess,
+                    #         os.path.join(dict_config['sModelFile'],
+                    #                      dict_config['model_name']),
+                    #         global_step=step)
+                    #     log.info(' model saved. epoch:{}, step:{}'.format(
+                    #         epoch, step))
 
 
 def evaluate(session, model, x_test, y_test, sequence_test, id2tag, id2word):
