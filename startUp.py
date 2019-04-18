@@ -4,22 +4,10 @@ Date:  2019-4-18
 describe: api起始页
 '''
 __author__ = 'Albert'
-# from datetime import date
 import tornado.escape
 import tornado.ioloop
 import tornado.web
-# import pandas as pd
-# import loyalLevel as loyal
-# import loyalLevel_v2 as loyal_v2
-# import coursePredict as course
-# import associateCourse as asso
-# import userSimilarity as user
-# import associateRules as rules
-# import userSimilarity_v2 as user_v2
-# import userSimilarity_v3 as user_v3
 from tornado.options import define, options
-# import coursePredict_v2 as course2
-# import dataProcess.multiLabelEncoder
 import main
 import json
 
