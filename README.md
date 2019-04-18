@@ -17,6 +17,11 @@ tensorflow version:1.13.1
 pandas 0.24.2 
 
 
-you can run main.py  to perform the training
+you can run main.py  to perform the training and evaluate
+
+you can run startUp.py for starting a api: 
+    
+    method:post
+    url : http://ip:9000/NER/v1
 
 updating
