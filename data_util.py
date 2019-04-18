@@ -187,7 +187,7 @@ def process_input(inputText,word2id, dict_config):
           senquence_lengths: the vector of true sequence length
     '''
 
-    sentences = re.split(dict_config['splitSenPattern'], inputText)
+    sentences = re.split(dict_config['splitSenPattern'][0:-2], inputText)
     input_processed = []
     input_wordIds = []
     senquence_lengths = []

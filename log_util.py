@@ -37,9 +37,6 @@ class Log:
         elif level == 'error':
             self.logger.error(message)
 
-        # 关闭打开的文件
-        # fh.close()
-
     def debug(self, message):
         self.__out('debug', message)
 

@@ -79,7 +79,6 @@ def train(dict_config):
     log = Log(dict_config['log'])
     log.info('execute train')
 
-    
     x_train, x_test, y_train, y_test, sequence_train, sequence_test, id2word, id2tag, word2id, tag2id = pre_process(
         dict_config)
     log.info(' data processed')
@@ -108,9 +107,9 @@ def train(dict_config):
                 sqe, loss, _ = sess.run(
                     [model.decode_tags, model.loss, model.train_op], dic)
 
-                if step % dict_config['model_save_step'] == 0:                    
+                if step % dict_config['model_save_step'] == 0:
                     log.info(' step : {}, and loss is {}'.format(step, loss))
-                    
+
                     model.rate = 0
                     P_, R_, F1_ = evaluate(sess, model, x_train, y_train,
                                            sequence_train, id2tag, id2word)
@@ -122,18 +121,16 @@ def train(dict_config):
                     P, R, F1 = evaluate(sess, model, x_test, y_test,
                                         sequence_test, id2tag, id2word)
                     test_s = 'Test data P value:{},R value:{},F1 value:{}'.format(
-                        P, R, F1)                    
+                        P, R, F1)
                     log.info(test_s)
 
                     saver.save(
-                            sess,
-                            os.path.join(dict_config['sModelFile'],
-                                         dict_config['model_name']),
-                            global_step=step)
+                        sess,
+                        os.path.join(dict_config['sModelFile'],
+                                     dict_config['model_name']),
+                        global_step=step)
                     log.info(' model saved. epoch:{}, step:{}'.format(
-                            epoch, step))
-
-
+                        epoch, step))
 
                     # global F
                     # if F1 > F:
@@ -162,6 +159,7 @@ def evaluate(session, model, x_test, y_test, sequence_test, id2tag, id2word):
 
 
 def inference(dict_config):
+    log = Log(dict_config['log'])
     log.info("begin to inference")
     with open(dict_config['dicPath'], "rb") as f:
         id2word, id2tag, word2id, tag2id = pickle.load(f)
@@ -171,18 +169,25 @@ def inference(dict_config):
             inputText = input("Please enter your input: ")
             entities = process_input(model, sess, inputText, word2id, id2tag,
                                      dict_config)
+            logresu = []
+            logresu.append(inputText)
             length = len(entities)
             if length <= 0:
                 print("Sorry, we cannot find entity from input!")
                 continue
             print("we find result as bellow:")
             for i in range(length):
-                print("{}:{}".format(entities[i][0], entities[i][1]))
+                r = "{}:{}".format(entities[i][0], entities[i][1])
+                logresu.append(r)
+                print(r)
+            log.info("input text:{}, result:{}".format(
+                logresu[0], logresu[1:] if length > 0 else ''))
 
 
 def run():
     # convert to dict
     dic = vars(params)
+    dic['embedding'] = None
 
     if dic['is_train']:
         train(dic)
@@ -192,6 +197,44 @@ def run():
         # merging config, using dic to overwrite saved when same key
         dic = {**saved, **dic}
         inference(dic)
+
+
+def inference_online(dict_config, string):
+    tf.reset_default_graph()
+    with open(dict_config['dicPath'], "rb") as f:
+        id2word, id2tag, word2id, tag2id = pickle.load(f)
+    with tf.Session() as sess:
+        model = createModel(sess, dict_config)
+
+        # inputText = input("Please enter your input: ")
+        entities = process_input(model, sess, string, word2id, id2tag,
+                                 dict_config)
+        return entities
+
+
+def predict(string):
+    dic = vars(params)
+    dic['embedding'] = None
+    dic['is_train'] = False
+    saved = loadJson()
+    # merging config, using dic to overwrite saved when same key
+    dic = {**saved, **dic}
+    return inference_online(dic, string)
+
+
+class SingleModel:
+    model = None
+
+    def __init__(self):
+        raise SyntaxError("can not instance, please use get_model")
+
+    @staticmethod
+    def get_model():
+
+        if SingleModel.model is None:
+            pass
+        # load model
+        return SingleModel.model
 
 
 if __name__ == "__main__":

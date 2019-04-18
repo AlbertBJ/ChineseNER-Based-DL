@@ -195,6 +195,6 @@ def loadJson():
     jsonfile=os.path.join(os.path.dirname(__file__), 'config/conf.json')
     if not os.path.exists(jsonfile):
         return None
-    with open() as json_file:
+    with open(jsonfile,'r') as json_file:
         data = json.load(json_file)
     return data

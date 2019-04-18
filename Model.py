@@ -95,7 +95,8 @@ class Model:
                 'weight', [2 * self.embedding_dim, self.tag_size],
                 dtype=tf.float32)
             b = tf.get_variable('bias', [self.tag_size], dtype=tf.float32)
-            if not l2_regularizer or l2_regularizer is not None:
+            if self.is_train and (not l2_regularizer
+                                  or l2_regularizer is not None):
                 tf.add_to_collection('l2_loss', l2_regularizer(w))
 
             dense_output = tf.nn.relu(tf.add(tf.linalg.matmul(inputs, w), b))
@@ -122,33 +123,6 @@ class Model:
         get loss layer minimizing loss
         '''
         # crf  maxmizing log_likelihood, so add a minus before log_likelihood here to minimize the loss
-        self.loss = tf.math.reduce_mean(-log_likelihood) + tf.add_n(
-            tf.get_collection('l2_loss'))
+        # + tf.add_n(tf.get_collection('l2_loss')) if self.is_train else 0
+        self.loss = tf.math.reduce_mean(-log_likelihood)
         self.train_op = tf.train.AdamOptimizer(self.lr).minimize(self.loss)
-
-    def train(self):
-        '''
-        train model
-        '''
-        # process data
-
-        # build NN
-
-        # train
-
-        pass
-
-    def Inference(self):
-        '''
-        run model to inference results
-        '''
-        pass
-
-    def precision(self) -> np.float32:
-        pass
-
-    def recall(self) -> np.float32:
-        pass
-
-    def F1(self):
-        pass
